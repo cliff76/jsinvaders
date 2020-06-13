@@ -1,7 +1,12 @@
 var gamePieces;
 
 function buildGamePieces() {
-    return [new component(30, 30, "red", 10, 120)];
+    const movingBlock = new component(30, 30, "green", 10, 120);
+    const fallingBlock = new component(30, 30, "red", 10, 120);
+    fallingBlock.move = function(){
+        this.y += 1;
+    }
+    return [movingBlock, fallingBlock];
 }
 
 function startGame() {
