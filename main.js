@@ -1,8 +1,12 @@
 var gamePieces;
 
+function buildGamePieces() {
+    return [new component(30, 30, "red", 10, 120)];
+}
+
 function startGame() {
     gameArea.start();
-    gamePieces = [new component(30, 30, "red", 10, 120)];
+    gamePieces = buildGamePieces();
   }
   
   var gameArea = {
