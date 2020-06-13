@@ -24,9 +24,17 @@ function startGame() {
     this.height = height;
     this.x = x;
     this.y = y;
-    ctx = gameArea.context;
-    ctx.fillStyle = color;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+    this.update = function(){
+        ctx = gameArea.context;
+        ctx.fillStyle = color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+      }
+  }
+
+  function updateGameArea() {
+    gameArea.clear();
+    gamePiece.update();
   }
 
   startGame();
+  updateGameArea();
