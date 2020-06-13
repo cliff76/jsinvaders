@@ -1,8 +1,8 @@
-var gamePiece;
+var gamePieces;
 
 function startGame() {
     gameArea.start();
-    gamePiece = new component(30, 30, "red", 10, 120);
+    gamePieces = [new component(30, 30, "red", 10, 120)];
   }
   
   var gameArea = {
@@ -29,13 +29,15 @@ function startGame() {
         ctx = gameArea.context;
         ctx.fillStyle = color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
-      }
+    }
+    this.move = function(){
+        this.x += 1;
+    }
   }
 
   function updateGameArea() {
     gameArea.clear();
-    gamePiece.update();
-    gamePiece.x += 1;
+    gamePieces.forEach( eachPiece => { eachPiece.move(); eachPiece.update();})
   }
 
   startGame();
