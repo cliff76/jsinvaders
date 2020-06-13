@@ -35,6 +35,7 @@ function startGame() {
   function updateGameArea() {
     gameArea.clear();
     gamePiece.update();
+    gamePiece.x += 1;
   }
 
   startGame();
