@@ -1,3 +1,7 @@
+const configuration = {
+    shipSpeed: 5
+}
+
 var gamePieces;
   
 var gameArea = {
@@ -12,6 +16,11 @@ var gameArea = {
     },
     clear : function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    },
+    keysPressed: {
+        left: false,
+        right: false,
+        shoot: false
     }
   }
 
@@ -30,14 +39,15 @@ function buildShip() {
     const nearBottomOfScreen = gameArea.canvas.height - (sizeOfShip.height + gapFromBottom);
     const shipMiddleOfScreen = (gameArea.canvas.width/2) - (sizeOfShip.width/2);
     const ship =  new component(sizeOfShip.width, sizeOfShip.height, "yellow", shipMiddleOfScreen, nearBottomOfScreen);
-    var direction = 0;
+    ship.direction = 0;
     ship.move = function(){
-        ship.x += direction;
+        ship.x += ship.direction;
     }
     return ship;
 }
 
 function startGame() {
+    addDocumentEventListeners();
     gameArea.start();
     gamePieces = buildGamePieces();
   }
@@ -57,8 +67,40 @@ function startGame() {
     }
   }
 
+  /*
+  Document event listener listens to the HTML document for keyboard input
+  */
+  function addDocumentEventListeners() {
+      document.addEventListener('keydown', event => {
+        if(event.keyCode == 37) {
+            gameArea.keysPressed.left = true;
+        } else if(event.keyCode == 39) {
+            gameArea.keysPressed.right = true;
+        }
+      });
+
+      document.addEventListener('keyup', event => {
+        if(event.keyCode == 37) {
+            gameArea.keysPressed.left = false;
+        } else if(event.keyCode == 39) {
+            gameArea.keysPressed.right = false;;
+        }
+      });
+    }
+
+function handleInput(keysPressed) {
+    const ship = gamePieces[0];
+    ship.direction = 0;
+    if (keysPressed.left) {
+        ship.direction = -1 * configuration.shipSpeed;
+    } else if (keysPressed.right) {
+        ship.direction = 1 * configuration.shipSpeed;
+    }
+}
+
   function gameLoop() {
     gameArea.clear();
+    handleInput(gameArea.keysPressed);
     gamePieces.forEach( eachPiece => { eachPiece.move(); eachPiece.update();})
   }
 
