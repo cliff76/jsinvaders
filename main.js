@@ -1,20 +1,6 @@
 var gamePieces;
-
-function buildGamePieces() {
-    const movingBlock = new component(30, 30, "green", 10, 120);
-    const fallingBlock = new component(30, 30, "red", 10, 120);
-    fallingBlock.move = function(){
-        this.y += 1;
-    }
-    return [movingBlock, fallingBlock];
-}
-
-function startGame() {
-    gameArea.start();
-    gamePieces = buildGamePieces();
-  }
   
-  var gameArea = {
+var gameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
       this.canvas.width = 1280;
@@ -22,11 +8,38 @@ function startGame() {
       this.canvas.style = "border:1px solid #000000;";
       this.context = this.canvas.getContext("2d");
       document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-      this.interval = setInterval(updateGameArea, 20);
+      this.interval = setInterval(gameLoop, 20);
     },
     clear : function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
+  }
+
+function buildGamePieces() {
+    const ship = buildShip();
+    const fallingBlock = new component(30, 30, "red", 10, 120);
+    fallingBlock.move = function(){
+        this.y += 1;
+    }
+    return [ship, fallingBlock];
+}
+
+function buildShip() {
+    const sizeOfShip = {height: 30, width: 50};
+    const gapFromBottom = 10;
+    const nearBottomOfScreen = gameArea.canvas.height - (sizeOfShip.height + gapFromBottom);
+    const shipMiddleOfScreen = (gameArea.canvas.width/2) - (sizeOfShip.width/2);
+    const ship =  new component(sizeOfShip.width, sizeOfShip.height, "yellow", shipMiddleOfScreen, nearBottomOfScreen);
+    var direction = 0;
+    ship.move = function(){
+        ship.x += direction;
+    }
+    return ship;
+}
+
+function startGame() {
+    gameArea.start();
+    gamePieces = buildGamePieces();
   }
 
   function component(width, height, color, x, y) {
@@ -44,7 +57,7 @@ function startGame() {
     }
   }
 
-  function updateGameArea() {
+  function gameLoop() {
     gameArea.clear();
     gamePieces.forEach( eachPiece => { eachPiece.move(); eachPiece.update();})
   }
