@@ -65,6 +65,17 @@ function startGame() {
     gamePieces = buildGamePieces();
 }
 
+function componentOutOfBounds(component) {
+    return component.x > gameArea.canvas.width 
+    || component.x + component.width < 0
+    || component.y > gameArea.canvas.height 
+    || component.y + component.height < 0;
+}
+
+function destroyComponent(component) {
+    gamePieces = gamePieces.filter(it => it !== component);
+}
+
 function component(width, height, nameOrColor, x, y, type = 'color') {
     this.type = type;
     if (this.type === 'image') {
@@ -77,7 +88,9 @@ function component(width, height, nameOrColor, x, y, type = 'color') {
     this.y = y;
     this.update = function () {
         ctx = gameArea.context;
-        if (this.type === 'image') {
+        if (componentOutOfBounds(this)) {
+            destroyComponent(this);
+        } else if (this.type === 'image') {
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         } else {
             ctx.fillStyle = nameOrColor;
