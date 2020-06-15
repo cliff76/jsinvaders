@@ -27,7 +27,7 @@ var gameArea = {
 
 function buildGamePieces() {
     const ship = buildShip();
-    const fallingBlock = new component(30, 30, "red", 10, 120);
+    const fallingBlock = new component(30, 30, "red", 10, 0);
     fallingBlock.move = function () {
         this.y += 1;
     }
@@ -43,7 +43,10 @@ function buildShip() {
         "media/sprites/spaceship.png", shipMiddleOfScreen, nearBottomOfScreen, 'image');
     ship.direction = 0;
     ship.move = function () {
-        ship.x += ship.direction;
+        const newX = ship.x + ship.direction;
+        if(newX > 5 && newX + ship.width < gameArea.canvas.width - 5) {
+            ship.x = newX;
+        }
     }
     return ship;
 }
