@@ -1,5 +1,6 @@
 const configuration = {
-    shipSpeed: 5
+    shipSpeed: 5,
+    shotSpeed: 15,
 }
 
 var gamePieces;
@@ -47,6 +48,17 @@ function buildShip() {
     return ship;
 }
 
+function buildShot() {
+    const ship = getShipComponent();
+    const middleOfShip = (ship.x + (ship.width / 2));
+    const shot = new component(5, 25, 'blue', middleOfShip - 2, gameArea.canvas.height - 50);
+    shot.isShot = true;
+    shot.move = function(){
+        this.y -= configuration.shotSpeed;
+    }
+    return shot;
+}
+
 function startGame() {
     addDocumentEventListeners();
     gameArea.start();
@@ -86,6 +98,10 @@ function addDocumentEventListeners() {
             gameArea.keysPressed.left = true;
         } else if (event.keyCode == 39) {
             gameArea.keysPressed.right = true;
+        } else if (event.keyCode == 32) {
+            gameArea.keysPressed.shoot = true;
+        } else {
+            console.log('Keycode ', event.keyCode);
         }
     });
 
@@ -94,24 +110,36 @@ function addDocumentEventListeners() {
             gameArea.keysPressed.left = false;
         } else if (event.keyCode == 39) {
             gameArea.keysPressed.right = false;;
+        } else if (event.keyCode == 32) {
+            gameArea.keysPressed.shoot = false;;
         }
     });
 }
 
 function handleInput(keysPressed) {
-    const ship = gamePieces[0];
+    const ship = getShipComponent();
     ship.direction = 0;
     if (keysPressed.left) {
         ship.direction = -1 * configuration.shipSpeed;
     } else if (keysPressed.right) {
         ship.direction = 1 * configuration.shipSpeed;
+    } else if (keysPressed.shoot) {
+        keysPressed.shoot = false;
+        gamePieces.push(buildShot());
     }
+}
+
+function getShipComponent() {
+    return gamePieces[0];
 }
 
 function gameLoop() {
     gameArea.clear();
     handleInput(gameArea.keysPressed);
-    gamePieces.forEach(eachPiece => { eachPiece.move(); eachPiece.update(); })
+    gamePieces.forEach(eachPiece => {
+        eachPiece.move();
+        eachPiece.update(); 
+    });
 }
 
 startGame();
