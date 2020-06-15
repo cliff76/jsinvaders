@@ -1,5 +1,6 @@
 const configuration = {
-    shipSpeed: 5
+    shipSpeed: 5,
+    shotSpeed: 15,
 }
 
 var gamePieces;
@@ -38,12 +39,24 @@ function buildShip() {
     const gapFromBottom = 10;
     const nearBottomOfScreen = gameArea.canvas.height - (sizeOfShip.height + gapFromBottom);
     const shipMiddleOfScreen = (gameArea.canvas.width / 2) - (sizeOfShip.width / 2);
-    const ship = new component(sizeOfShip.width, sizeOfShip.height, "yellow", shipMiddleOfScreen, nearBottomOfScreen);
+    const ship = new component(sizeOfShip.width, sizeOfShip.height, 
+        "media/sprites/spaceship.png", shipMiddleOfScreen, nearBottomOfScreen, 'image');
     ship.direction = 0;
     ship.move = function () {
         ship.x += ship.direction;
     }
     return ship;
+}
+
+function buildShot() {
+    const ship = getShipComponent();
+    const middleOfShip = (ship.x + (ship.width / 2));
+    const shot = new component(5, 25, 'blue', middleOfShip - 2, gameArea.canvas.height - 50);
+    shot.isShot = true;
+    shot.move = function(){
+        this.y -= configuration.shotSpeed;
+    }
+    return shot;
 }
 
 function startGame() {
@@ -52,15 +65,24 @@ function startGame() {
     gamePieces = buildGamePieces();
 }
 
-function component(width, height, color, x, y) {
+function component(width, height, nameOrColor, x, y, type = 'color') {
+    this.type = type;
+    if (this.type === 'image') {
+        this.image = new Image();
+        this.image.src = nameOrColor;
+    }
     this.width = width;
     this.height = height;
     this.x = x;
     this.y = y;
     this.update = function () {
         ctx = gameArea.context;
-        ctx.fillStyle = color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        if (this.type === 'image') {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        } else {
+            ctx.fillStyle = nameOrColor;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
     }
     this.move = function () {
         this.x += 1;
@@ -76,6 +98,10 @@ function addDocumentEventListeners() {
             gameArea.keysPressed.left = true;
         } else if (event.keyCode == 39) {
             gameArea.keysPressed.right = true;
+        } else if (event.keyCode == 32) {
+            gameArea.keysPressed.shoot = true;
+        } else {
+            console.log('Keycode ', event.keyCode);
         }
     });
 
@@ -84,24 +110,36 @@ function addDocumentEventListeners() {
             gameArea.keysPressed.left = false;
         } else if (event.keyCode == 39) {
             gameArea.keysPressed.right = false;;
+        } else if (event.keyCode == 32) {
+            gameArea.keysPressed.shoot = false;;
         }
     });
 }
 
 function handleInput(keysPressed) {
-    const ship = gamePieces[0];
+    const ship = getShipComponent();
     ship.direction = 0;
     if (keysPressed.left) {
         ship.direction = -1 * configuration.shipSpeed;
     } else if (keysPressed.right) {
         ship.direction = 1 * configuration.shipSpeed;
+    } else if (keysPressed.shoot) {
+        keysPressed.shoot = false;
+        gamePieces.push(buildShot());
     }
+}
+
+function getShipComponent() {
+    return gamePieces[0];
 }
 
 function gameLoop() {
     gameArea.clear();
     handleInput(gameArea.keysPressed);
-    gamePieces.forEach(eachPiece => { eachPiece.move(); eachPiece.update(); })
+    gamePieces.forEach(eachPiece => {
+        eachPiece.move();
+        eachPiece.update(); 
+    });
 }
 
 startGame();
