@@ -38,7 +38,8 @@ function buildShip() {
     const gapFromBottom = 10;
     const nearBottomOfScreen = gameArea.canvas.height - (sizeOfShip.height + gapFromBottom);
     const shipMiddleOfScreen = (gameArea.canvas.width / 2) - (sizeOfShip.width / 2);
-    const ship = new component(sizeOfShip.width, sizeOfShip.height, "yellow", shipMiddleOfScreen, nearBottomOfScreen);
+    const ship = new component(sizeOfShip.width, sizeOfShip.height, 
+        "media/sprites/spaceship.png", shipMiddleOfScreen, nearBottomOfScreen, 'image');
     ship.direction = 0;
     ship.move = function () {
         ship.x += ship.direction;
@@ -52,15 +53,24 @@ function startGame() {
     gamePieces = buildGamePieces();
 }
 
-function component(width, height, color, x, y) {
+function component(width, height, nameOrColor, x, y, type = 'color') {
+    this.type = type;
+    if (this.type === 'image') {
+        this.image = new Image();
+        this.image.src = nameOrColor;
+    }
     this.width = width;
     this.height = height;
     this.x = x;
     this.y = y;
     this.update = function () {
         ctx = gameArea.context;
-        ctx.fillStyle = color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        if (this.type === 'image') {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        } else {
+            ctx.fillStyle = nameOrColor;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
     }
     this.move = function () {
         this.x += 1;
