@@ -3,9 +3,8 @@ const configuration = {
     shotSpeed: 15,
 }
 
-var gamePieces;
-
 var gameArea = {
+    gamePieces: [],
     canvas: document.createElement("canvas"),
     start: function () {
         this.canvas.width = 1280;
@@ -25,13 +24,31 @@ var gameArea = {
     }
 }
 
-function buildGamePieces() {
-    const ship = buildShip();
-    const fallingBlock = new component(30, 30, "red", 10, 120);
+function buildFallingBlocks(gamePieces, numberOfBlocks) {
+    const blockSize = 30;
+    const locations = new Set();
+    for(i = 0; i < numberOfBlocks; i++) {
+        var nextX = getRandomInt(5, gameArea.canvas.width - blockSize - 5);
+        nextX = nextX - (nextX % (blockSize + 5));
+        locations.add(nextX)
+    }
+    console.log('Adding ' + numberOfBlocks + ' blocks.', locations);
+    locations.forEach(each => gameArea.gamePieces.push(buildFallingBlock(blockSize, each)));
+    setTimeout(buildFallingBlocks, 5000, gameArea.gamePieces, getRandomInt(1,5));
+}
+
+function buildFallingBlock(blockSize, x) {
+    const fallingBlock = new component(blockSize, blockSize, "red", x, 0);
     fallingBlock.move = function () {
         this.y += 1;
     }
-    return [ship, fallingBlock];
+    return fallingBlock;
+}
+
+function buildGamePieces(gamePieces) {
+    const ship = buildShip();
+    gamePieces.push(ship);
+    buildFallingBlocks(gameArea.gamePieces, getRandomInt(1,5));
 }
 
 function buildShip() {
@@ -43,7 +60,10 @@ function buildShip() {
         "media/sprites/spaceship.png", shipMiddleOfScreen, nearBottomOfScreen, 'image');
     ship.direction = 0;
     ship.move = function () {
-        ship.x += ship.direction;
+        const newX = ship.x + ship.direction;
+        if(newX > 5 && newX + ship.width < gameArea.canvas.width - 5) {
+            ship.x = newX;
+        }
     }
     return ship;
 }
@@ -62,7 +82,18 @@ function buildShot() {
 function startGame() {
     addDocumentEventListeners();
     gameArea.start();
-    gamePieces = buildGamePieces();
+    buildGamePieces(gameArea.gamePieces);
+}
+
+function componentOutOfBounds(component) {
+    return component.x > gameArea.canvas.width 
+    || component.x + component.width < 0
+    || component.y > gameArea.canvas.height 
+    || component.y + component.height < 0;
+}
+
+function destroyComponent(component) {
+    gameArea.gamePieces = gameArea.gamePieces.filter(it => it !== component);
 }
 
 function component(width, height, nameOrColor, x, y, type = 'color') {
@@ -77,7 +108,9 @@ function component(width, height, nameOrColor, x, y, type = 'color') {
     this.y = y;
     this.update = function () {
         ctx = gameArea.context;
-        if (this.type === 'image') {
+        if (componentOutOfBounds(this)) {
+            destroyComponent(this);
+        } else if (this.type === 'image') {
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         } else {
             ctx.fillStyle = nameOrColor;
@@ -125,21 +158,28 @@ function handleInput(keysPressed) {
         ship.direction = 1 * configuration.shipSpeed;
     } else if (keysPressed.shoot) {
         keysPressed.shoot = false;
-        gamePieces.push(buildShot());
+        gameArea.gamePieces.push(buildShot());
     }
 }
 
 function getShipComponent() {
-    return gamePieces[0];
+    return gameArea.gamePieces[0];
 }
 
 function gameLoop() {
     gameArea.clear();
     handleInput(gameArea.keysPressed);
-    gamePieces.forEach(eachPiece => {
+    gameArea.gamePieces.forEach(eachPiece => {
         eachPiece.move();
         eachPiece.update(); 
     });
+}
+
+// Utilities
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 startGame();
