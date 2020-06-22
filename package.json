@@ -8,6 +8,12 @@
   "license": "MIT",
   "private": false,
   "devDependencies": {
+    "cpx": "^1.5.0",
     "typescript": "^3.9.5"
+  },
+  "scripts": {
+    "build:copy": "cpx 'src/*.{html,css}' dist",
+    "build:compile": "tsc src/main.ts --outDir dist",
+    "build": "yarn build:copy && yarn build:compile"
   }
 }
