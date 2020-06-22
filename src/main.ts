@@ -3,9 +3,23 @@ const configuration = {
     shotSpeed: 15,
 }
 
-var gameArea = {
+interface GameArea {
+    gamePieces: component[],
+    canvas: HTMLCanvasElement,
+    context,
+    start: () => void,
+    clear: () => void,
+    keysPressed: {
+        left: boolean,
+        right: boolean,
+        shoot: boolean
+    }
+}
+
+const gameArea: GameArea = {
     gamePieces: [],
     canvas: document.createElement("canvas"),
+    context: null,
     start: function () {
         this.canvas.width = 1280;
         this.canvas.height = 800;
@@ -27,7 +41,7 @@ var gameArea = {
 function buildFallingBlocks(gamePieces, numberOfBlocks) {
     const blockSize = 30;
     const locations = new Set();
-    for(i = 0; i < numberOfBlocks; i++) {
+    for(let i = 0; i < numberOfBlocks; i++) {
         var nextX = getRandomInt(5, gameArea.canvas.width - blockSize - 5);
         nextX = nextX - (nextX % (blockSize + 5));
         locations.add(nextX)
@@ -96,28 +110,44 @@ function destroyComponent(component) {
     gameArea.gamePieces = gameArea.gamePieces.filter(it => it !== component);
 }
 
-function component(width, height, nameOrColor, x, y, type = 'color') {
-    this.type = type;
-    if (this.type === 'image') {
-        this.image = new Image();
-        this.image.src = nameOrColor;
+class component {
+    type: string;
+    image: HTMLImageElement;
+    width: number;
+    height: number;
+    x:number;
+    y:number;
+    direction: number = 0;
+    isShot: boolean = false;
+    nameOrColor: string;
+
+    constructor(width: number, height: number, nameOrColor: string, x:number, y:number, type: string = 'color') {
+        this.type = type;
+        if (this.type === 'image') {
+            this.image = new Image();
+            this.image.src = nameOrColor;
+        } else {
+            this.nameOrColor = nameOrColor;
+        }
+        this.width = width;
+        this.height = height;
+        this.x = x;
+        this.y = y;
     }
-    this.width = width;
-    this.height = height;
-    this.x = x;
-    this.y = y;
-    this.update = function () {
-        ctx = gameArea.context;
+
+    update = () => {
+        const ctx = gameArea.context;
         if (componentOutOfBounds(this)) {
             destroyComponent(this);
         } else if (this.type === 'image') {
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         } else {
-            ctx.fillStyle = nameOrColor;
+            ctx.fillStyle = this.nameOrColor;
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
     }
-    this.move = function () {
+
+    move = () => {
         this.x += 1;
     }
 }

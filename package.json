@@ -15,7 +15,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "build:copy": "cpx 'src/*.{html,css}' dist && cpx 'media/**' dist/media",
-    "build:compile": "tsc src/main.ts --outDir dist",
+    "build:compile": "tsc src/main.ts --lib es2020,dom --outDir dist",
     "build": "yarn build:copy && yarn build:compile"
   }
 }
