@@ -9,9 +9,11 @@
   "private": false,
   "devDependencies": {
     "cpx": "^1.5.0",
+    "rimraf": "^3.0.2",
     "typescript": "^3.9.5"
   },
   "scripts": {
+    "clean": "rimraf dist",
     "build:copy": "cpx 'src/*.{html,css}' dist && cpx 'media/**' dist/media",
     "build:compile": "tsc src/main.ts --outDir dist",
     "build": "yarn build:copy && yarn build:compile"
