@@ -12,7 +12,7 @@
     "typescript": "^3.9.5"
   },
   "scripts": {
-    "build:copy": "cpx 'src/*.{html,css}' dist",
+    "build:copy": "cpx 'src/*.{html,css}' dist && cpx 'media/**' dist/media",
     "build:compile": "tsc src/main.ts --outDir dist",
     "build": "yarn build:copy && yarn build:compile"
   }
